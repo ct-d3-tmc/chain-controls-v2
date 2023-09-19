@@ -1,11 +1,8 @@
-import { useRouter } from 'next/router';
-import * as config from '../../utils/config.js'; 
-import { NextApiRequest, NextApiResponse } from 'next';
-import * as fs from 'fs';
+import * as fs from "fs";
+import { useRouter } from "next/router";
 
-const DATA_DIR = '../data/excelTabs.txt'
-const UPLOAD_DIR = "../upload"
-
+const DATA_DIR = "../data/excelTabs.txt";
+const UPLOAD_DIR = "../upload";
 
 let postman: any;
 // Content-type is not relevant in a TypeScript/HTML context
@@ -307,45 +304,37 @@ const htmlContent = `
     <form class='buttons' action='printFile.py' method='post'>
     <button class="tablinks" type="button" onClick="goHome()"><img src="../client/img/home.png" width=32px></img> Home</button>
     `;
-    const formElement = document.createElement("form");
-    const router = useRouter();
-    const post_name: string = router.query.post_name as string;
-    const csvArray: any[] = [];
-    let class_name:any , lineStrip:any;
+const formElement = document.createElement("form");
+const router = useRouter();
+const post_name: string = router.query.post_name as string;
+const csvArray: any[] = [];
+let class_name: any, lineStrip: any;
 
-    fs.readFile(DATA_DIR, 'utf-8', (err, data) => {
-        if (err) {
-        console.error(err);
-        return;
-        }   
-        const lines = data.trim().split('\n');
-        // Push each line into the csvArray
-        for (let i = 0; i < lines.length; i++) {
-             lineStrip = lines[i].trim();
-            csvArray.push(lineStrip);
-          if ((i == 0 && post_name === '') ||  (post_name === lineStrip)){
-            class_name = "tablinks disabled"
-          }          
-        else
-            class_name = "tablinks"
-        
-        }
-        
-        const buttonElement = document.createElement("button");
-        buttonElement.className = class_name;
-        buttonElement.type = "submit";
-        buttonElement.name = "postName";
-        buttonElement.value = lineStrip;
-        buttonElement.textContent = lineStrip;
-        buttonElement.onclick = () => console.log(lineStrip);
-        formElement.appendChild(buttonElement);  
-    });
+fs.readFile(DATA_DIR, "utf-8", (err, data) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  const lines = data.trim().split("\n");
+  // Push each line into the csvArray
+  for (let i = 0; i < lines.length; i++) {
+    lineStrip = lines[i].trim();
+    csvArray.push(lineStrip);
+    if ((i == 0 && post_name === "") || post_name === lineStrip) {
+      class_name = "tablinks disabled";
+    } else class_name = "tablinks";
+  }
+
+  const buttonElement = document.createElement("button");
+  buttonElement.className = class_name;
+  buttonElement.type = "submit";
+  buttonElement.name = "postName";
+  buttonElement.value = lineStrip;
+  buttonElement.textContent = lineStrip;
+  buttonElement.onclick = () => console.log(lineStrip);
+  formElement.appendChild(buttonElement);
+});
 document.body.appendChild(formElement);
-
-   
-
-
-
 
 /*export default async function handler(chaincontrolRequest: NextApiRequest, chaincontrolResponse: NextApiResponse) {
     const router = useRouter();
