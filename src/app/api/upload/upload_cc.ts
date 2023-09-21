@@ -15,7 +15,7 @@ export const config = {
   },
 };
 
-export default async function handler(req: Request, res: Response) {
+export default async function upload_cc(req: Request, res: Response) {
   try {
     upload.single("excelFile")(req, res, async (error: any) => {
       if (error) {

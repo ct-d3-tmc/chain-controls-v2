@@ -16,6 +16,8 @@ export const ID_TAG = "id"; // Tag within xml that will need to be updated with 
 export const MULTITEXT_TAG = "multiText"; // For CMS message to be updated
 export const MSG_ID_TAG = "msgId"; // used to check msg priority level and text
 
+export const mas_login_filepath = "src/data/xml/mas_login.xml";
+
 // Sets the cms messages to transition between the 2 messages every 3 seconds
 export const CMS_MESSAGE_TRANSITION = "[pt30o0]";
 
