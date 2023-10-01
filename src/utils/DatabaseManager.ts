@@ -50,6 +50,7 @@ class DatabaseManager {
       try {
         const request = this.pool.request();
         if (params !== undefined) {
+          console.log(params);
           request.input("username", params);
         }
         const result = await request.query(query);

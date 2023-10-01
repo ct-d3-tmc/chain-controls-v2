@@ -18,6 +18,8 @@ export const MSG_ID_TAG = "msgId"; // used to check msg priority level and text
 
 export const mas_login_filepath = "src/data/xml/mas_login.xml";
 
+export const retrieve_cms_filepath = "../data/xml/mas_retrieve_cms_queues.xml";
+
 // Sets the cms messages to transition between the 2 messages every 3 seconds
 export const CMS_MESSAGE_TRANSITION = "[pt30o0]";
 
