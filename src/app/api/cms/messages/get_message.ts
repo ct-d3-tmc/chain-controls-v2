@@ -1,72 +1,56 @@
 import ActiveITSClient from "@entities/ActiveITSClient";
+import ActiveITSDBClient from "@entities/ActiveITSDBClient";
 import * as env from "@utils/config.js";
-import fs from "fs";
-import { useRouter } from "next/router";
-import { Builder } from "xml2js";
+import { NextResponse, type NextRequest } from "next/server";
 
 const api_url: string | undefined = process.env.ACTIVEITS_API_HOSTNAME;
 const api_port: string | undefined = process.env.ACTIVEITS_API_PORT;
 
-export default async function get_message(req: Request, res: Response) {
-  const router = useRouter();
+export default async function get_message(req: NextRequest, res: NextResponse) {
+  const dict_response: Record<string, string> = {};
   try {
-    const active_client: ActiveITSClient = new ActiveITSClient(
-      api_url!,
-      Number(api_port)
-    );
-    const { epage_message, goldeneye_username, name, operator_inputs, data } =
-      router.query;
-    // Connect to the client
+    const active_client: ActiveITSClient = new ActiveITSClient(api_url!, Number(api_port));
+    const db_client: ActiveITSDBClient = ActiveITSDBClient.getInstance();
+    db_client.initialize();
+    const searchParams = req.nextUrl.searchParams;
+    const goldeneye_username: string | null = searchParams.get("goldeneye_username");
+    const data = searchParams.get("data"); //need to verify data type
     await active_client.connect();
-    console.log("Connected successfully");
-
-    // Read XML data
-    const xmlData = fs.readFileSync(env.mas_login_filepath, "utf-8");
-
-    // Parse the XML data
-    const result = await active_client.parseXmlAsync(xmlData);
-
-    // Modify the parsed data
-    const authenticateReq = result.authenticateRes;
-
-    if (!authenticateReq) {
-      throw new Error("XML structure is invalid.");
+    await db_client.connect();
+    try {
+      const dict_cms_num_to_activeITS_num: Promise<"" | Record<string, string>> | any = db_client.get_cms_id_to_ritms_id_dict();
+      const mas_security_token: string = await active_client.login_to_subsystem(env.DATABUS_SUBSYSTEM, goldeneye_username, db_client);
+      const decoded_cml_queues: string = await active_client.get_queue_msgs(mas_security_token, String(goldeneye_username));
+      active_client.close();
+      const cms_num_to_current_msg: Promise<"" | Record<string, string>> | any = await db_client.get_current_cms_msgs();
+      const RECEIVED_DATA: string = data ? String(data) : "";
+      const parsedData = JSON.parse(RECEIVED_DATA);
+      let current_msg = "";
+      for (const cms_id in parsedData) {
+        const key: string = String(cms_id);
+        current_msg = cms_num_to_current_msg[key];
+        active_client
+          .is_travel_time_message(parseInt(dict_cms_num_to_activeITS_num[cms_id]), decoded_cml_queues, current_msg)
+          .then((result) => {
+            console.log("get back here");
+            current_msg = "";
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        current_msg = active_client.translateNTCIPToHTML(current_msg);
+        dict_response[String(cms_id)] = current_msg;
+        const get_cms_message_response = JSON.stringify(dict_response, null, 4);
+        return get_cms_message_response;
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      active_client.close();
+      db_client.close();
     }
-
-    authenticateReq.refId[0] = goldeneye_username; // Need to change
-    authenticateReq.username[0] = goldeneye_username; // Need to change
-    active_client
-      .getPassword(String(goldeneye_username))
-      .then((password: string) => {
-        //need to update
-        if (password != "") {
-          authenticateReq.password[0] = password;
-        } else {
-          console.log("User not found or password is null/undefined.");
-        }
-      });
-    // Convert the modified data back to XML
-    const builder = new Builder();
-    const modifiedXml: string = builder.buildObject(result);
-
-    // Send the modified data
-    const sendDataResult = await active_client.sendData(modifiedXml);
-    const mas_security_token: string = await active_client.readData();
-    const xml_queues = await active_client.get_queue_msgs(
-      mas_security_token,
-      String(goldeneye_username)
-    );
-    const decoded_cml_queues = await active_client.readData(); // tested and verified till this.
-    active_client.close();
-    const cms_num_to_current_msg: Promise<"" | Record<string, string>> =
-      active_client.get_current_cms_msgs();
-    const RECEIVED_DATA: string = data ? String(data) : "";
-    const parsedData = JSON.parse(RECEIVED_DATA);
-    for (const cms_id in parsedData) {
-      const key: string = String(cms_id);
-      // const msg = cms_num_to_current_msg[key];
-    }
+    return "";
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Failed to login to MAS Subsystem", error);
   }
 }
