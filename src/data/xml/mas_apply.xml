@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addMsgReq providerName="mas" providerType="mas">
+    <refId>chainControl</refId>
+    <icdVersion>1.0</icdVersion>
+    <username>chainControl</username>
+    <securityToken>Y/XueancLRShclMv</securityToken>
+    <id providerName="dms" resourceType="dms" centerId="District 3">49</id>
+    <multiMsg>
+            <multiText>[pt30o0][jl3]ICE AND SNOW[nl][jl3]TAKE IT SLOW</multiText>
+            <owner>chainControl</owner>
+            <priority>2</priority>
+            <duration>-1</duration>
+            <beaconsEnabled>false</beaconsEnabled>
+            <pixelServiceEnabled>false</pixelServiceEnabled>
+            <sendAsIs>false</sendAsIs>
+    </multiMsg>
+    <autoMergePrimary>false</autoMergePrimary>
+    <autoMergeSecondary>false</autoMergeSecondary>
+</addMsgReq>
