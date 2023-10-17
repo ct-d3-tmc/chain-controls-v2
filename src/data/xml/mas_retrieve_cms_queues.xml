@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<retrieveDataReq xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" providerName="mas" providerType="mas">
+	<refId></refId>
+	<icdVersion>1.0</icdVersion>
+	<username></username>
+	<securityToken></securityToken>
+	<queueData>true</queueData>
+    <providerName>dms</providerName>
+</retrieveDataReq>
