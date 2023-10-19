@@ -1,3 +1,26 @@
+import { z } from "zod";
+
+const configSchema = z.object({
+  SMTP_HOST: z.string().trim().min(1),
+  SMTP_PORT: z.coerce.number().int().positive(),
+  DEFAULT_EMAIL: z.string().email(),
+  KINGVALE_EMAIL: z.string().email(),
+
+  // Example of environment variable with a default value if not set
+  OPER_GET_CURRENT_MSGS: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim() || "CMS_Current_Messages"),
+
+  // TODO: implement rest of environment variables
+});
+
+const config = configSchema.parse(process.env);
+
+// You can now import config and use its type-checked environment variables
+// like config.SMTP_HOST instead of process.env.SMTP_HOST!
+export default config;
+
 export const OPER_GET_CURRENT_MSGS = "CMS_Current_Messages";
 export const OPER_NEW_CMS_MSGS = "CMS_New_Messages";
 export const OPER_CLEAR_CMS_MSGS = "CMS_Clear_Messages";

@@ -1,3 +1,4 @@
+import config from "@utils/config";
 import nodemailer from "nodemailer";
 
 class EmailSender {
@@ -5,12 +6,13 @@ class EmailSender {
   private readonly DISABLED: boolean = false;
   private readonly ENVIRONMENT: string = "PRODUCTION";
 
-  private readonly SMTP_HOST: any = process.env.SMTP_HOST!;
-  private readonly SMTP_PORT: number = parseInt(process.env.SMTP_PORT!);
+  private readonly SMTP_HOST: string = config.SMTP_HOST;
+  private readonly SMTP_PORT: number = config.SMTP_PORT;
   private readonly TIMEOUT_SECS: number = 30; // Replace with your desired timeout value
-  private readonly DEFAULT_EMAIL: string = process.env.DEFAULT_EMAIL!;
-  private readonly KINGVALE_EMAIL: string = process.env.KINGVALE_EMAIL!;
-  private readonly D3_DISPATCHERS_EMAIL: string = process.env.D3_DISPATCHERS_EMAIL!;
+  private readonly DEFAULT_EMAIL: string = config.DEFAULT_EMAIL;
+  private readonly KINGVALE_EMAIL: string = config.KINGVALE_EMAIL;
+  private readonly D3_DISPATCHERS_EMAIL: string =
+    process.env.D3_DISPATCHERS_EMAIL!;
   private readonly SEND_TO_TEST_LIST: string[] = ["jared.sun@dot.ca.gov"];
   private readonly BCC_RECIPIENTS_LIST: string[] = ["jared.sun@dot.ca.gov"];
 
@@ -55,7 +57,14 @@ class EmailSender {
       bcc: this.BCC_RECIPIENTS_LIST.join(", "),
     };
 
-    console.log("Sending email:", subject, "to", to_email_list.join(", "), "BCC", this.BCC_RECIPIENTS_LIST);
+    console.log(
+      "Sending email:",
+      subject,
+      "to",
+      to_email_list.join(", "),
+      "BCC",
+      this.BCC_RECIPIENTS_LIST
+    );
 
     try {
       const info = await this.transporter.sendMail(mailOptions);
