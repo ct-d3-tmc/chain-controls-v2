@@ -7,7 +7,6 @@ export default class ActiveITSDB {
     user: process.env.ACTIVEITS_DB_USERNAME,
     password: process.env.ACTIVEITS_DB_PASSWORD,
     server: process.env.ActiveITS_IP!,
-    // server: "sv03tmcswridb",
     database: process.env.ACTIVEITS_DB_NAME,
     options: {
       encrypt: true, // Enable encryption
@@ -62,7 +61,6 @@ export default class ActiveITSDB {
       try {
         const request = ActiveITSDB.pool.request();
         if (params !== undefined) {
-          console.log(params);
           request.input("username", params);
         }
         const result = await request.query(query);
@@ -156,6 +154,31 @@ export default class ActiveITSDB {
       }
       console.log(cms_id_to_ritms_id);
       return cms_id_to_ritms_id;
+    } catch (error) {
+      console.error("Error executing query:", error);
+      return "";
+    }
+  }
+  public async is_cms_out_of_service(cms_id: any) {
+    try {
+      const zero_padded_id = cms_id.padStart(2, "0");
+      const query = `
+                SELECT
+                    DMS_STATUS.OPERATIONAL_STATUS
+                FROM
+                    DMS_STATUS
+                INNER JOIN
+                    ODS_DMS_IDS
+                    ON ODS_DMS_IDS.SUNGUIDE_ID = DMS_STATUS.RITMS_ID
+                WHERE
+                    ODS_DMS_IDS.DMS_NAME LIKE '{zero_padded_id} - %'`;
+
+      const query_result = await ActiveITSDB.getClient().executeQuery(query);
+      if (query_result.recordset.length === 0) {
+        return true; // If we can't find the CMS, assume it's out of service
+      }
+      const status = parseInt(query_result.recordset[0].OPERATIONAL_STATUS, 10);
+      return status === 4; // 4 is out of service.
     } catch (error) {
       console.error("Error executing query:", error);
       return "";
