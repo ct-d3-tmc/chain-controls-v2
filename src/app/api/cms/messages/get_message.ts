@@ -1,6 +1,6 @@
 import ActiveITSClient from "@entities/ActiveITSClient";
 import ActiveITSDB from "@entities/ActiveITSDB";
-import * as env from "@utils/config.js";
+import * as env from "@utils/config.constant";
 import { NextResponse, type NextRequest } from "next/server";
 
 const api_url: string | undefined = process.env.ACTIVEITS_API_HOSTNAME;

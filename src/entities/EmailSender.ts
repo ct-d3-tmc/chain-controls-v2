@@ -11,8 +11,7 @@ class EmailSender {
   private readonly TIMEOUT_SECS: number = 30; // Replace with your desired timeout value
   private readonly DEFAULT_EMAIL: string = config.DEFAULT_EMAIL;
   private readonly KINGVALE_EMAIL: string = config.KINGVALE_EMAIL;
-  private readonly D3_DISPATCHERS_EMAIL: string =
-    process.env.D3_DISPATCHERS_EMAIL!;
+  private readonly D3_DISPATCHERS_EMAIL: string =  config.D3_DISPATCHERS_EMAIL!;
   private readonly SEND_TO_TEST_LIST: string[] = ["jared.sun@dot.ca.gov"];
   private readonly BCC_RECIPIENTS_LIST: string[] = ["jared.sun@dot.ca.gov"];
 
