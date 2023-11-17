@@ -1,20 +1,20 @@
 import * as env from "@utils/config.constant";
 import fs from 'fs';
+import path from "path";
 
 interface HistoryEntry {
   Epoch: number;
   
 }
 
-export class SaveHistory {
-  private readonly HISTORY_JSON_PATH = env.HISTORY_JSON_PATH;
-  private readonly DISPLAY_LENGTH = env.DISPLAY_LENGTH;
-  private readonly MAX_LENGTH = env.MAX_LENGTH;
-  private readonly CHAIN_CONTROL_HISTORY = env.CHAIN_CONTROL_HISTORY;
-  path = require("path");
-  filePath = this.path.join(__dirname, this.HISTORY_JSON_PATH);
+export  default class History {
+  private static readonly HISTORY_JSON_PATH = env.HISTORY_JSON_PATH;
+  private static readonly DISPLAY_LENGTH = env.DISPLAY_LENGTH;
+  private static readonly MAX_LENGTH = env.MAX_LENGTH;
+  private static readonly CHAIN_CONTROL_HISTORY = env.CHAIN_CONTROL_HISTORY;
+  filePath = path.join(__dirname, History.HISTORY_JSON_PATH);
 
-  public create_entry(
+  public static create_entry(
     entry_data: any,
     operator_selections: any,
     goldeneye_username: string,
@@ -47,37 +47,37 @@ export class SaveHistory {
     newEntry["Epage"] = epage;
 
     console.log(`Creating new history entry: ${JSON.stringify(newEntry)}`);
-    this.appendToHistory(newEntry); 
+    History.append(newEntry); 
 }
-public appendToHistory(data: any): void {
-  const history = JSON.parse(fs.readFileSync(this.HISTORY_JSON_PATH, 'utf-8'));
+public static append(data: any): void {
+  const history = JSON.parse(fs.readFileSync(History.HISTORY_JSON_PATH, 'utf-8'));
 
-  history[this.CHAIN_CONTROL_HISTORY].push(data);
+  history[History.CHAIN_CONTROL_HISTORY].push(data);
 
-  this.write_history_json(history);
+  History.writeJson(history);
 }
-public write_history_json(data: any): void {
+public static  writeJson(data: any): void {
   const jsonData = JSON.stringify(data, null, 4); 
-  fs.writeFileSync(this.HISTORY_JSON_PATH, jsonData, { encoding: 'utf-8' });
+  fs.writeFileSync(History.HISTORY_JSON_PATH, jsonData, { encoding: 'utf-8' });
 }
-public loadHistory(): any[] {
-  const data = fs.readFileSync(this.HISTORY_JSON_PATH, 'utf-8');
+public static  loadHistory(): any[] {
+  const data = fs.readFileSync(History.HISTORY_JSON_PATH, 'utf-8');
   const jsonData = JSON.parse(data);
-  return jsonData[this.CHAIN_CONTROL_HISTORY] || []; 
+  return jsonData[History.CHAIN_CONTROL_HISTORY] || []; 
 }
 
-public  maintain_history_length(): void {
-  let history = this.loadHistory();
-  if (history.length > this.MAX_LENGTH) {
+public static  maintainLength(): void {
+  let history = History.loadHistory();
+  if (history.length > History.MAX_LENGTH) {
       history.sort((a:any, b:any) => a.Epoch - b.Epoch); 
-      history = history.slice(-this.MAX_LENGTH); 
-      this.write_history_json(history);
+      history = history.slice(-History.MAX_LENGTH); 
+      History.writeJson(history);
   }
 }
-public get_last_n_entries(): { Historical_Content: HistoryEntry[] } {
-  let history = this.loadHistory();
+public static  getLastNentries(): { Historical_Content: HistoryEntry[] } {
+  let history = History.loadHistory();
   history.sort((a, b) => b.Epoch - a.Epoch); 
-  const lastNEntries = history.slice(0, this.DISPLAY_LENGTH);
+  const lastNEntries = history.slice(0, History.DISPLAY_LENGTH);
   return { Historical_Content: lastNEntries };
 }
 }

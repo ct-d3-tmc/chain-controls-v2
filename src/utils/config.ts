@@ -6,6 +6,8 @@ const configSchema = z.object({
   DEFAULT_EMAIL: z.string().email(),
   KINGVALE_EMAIL: z.string().email(),
   D3_DISPATCHERS_EMAIL: z.string().email(),
+  ACTIVEITS_API_HOSTNAME: z.string().trim().min(1),
+  ACTIVEITS_API_PORT: z.coerce.number().int().positive(),
 
   // Example of environment variable with a default value if not set
   OPER_GET_CURRENT_MSGS: z
@@ -16,7 +18,10 @@ const configSchema = z.object({
   // TODO: implement rest of environment variables
 });
 
+
+
 const config = configSchema.parse(process.env);
+
 
 // You can now import config and use its type-checked environment variables
 // like config.SMTP_HOST instead of process.env.SMTP_HOST!

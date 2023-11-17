@@ -1,12 +1,13 @@
 import ActiveITSClient from "@entities/ActiveITSClient";
 import ActiveITSDB from "@entities/ActiveITSDB";
 import EmailSender from "@entities/EmailSender";
-import { SaveHistory } from "@entities/SaveHistory";
-import * as env from "@utils/config.constant";
+import History from "@entities/History";
+import config from "@utils/config";
+import * as constants from "@utils/config.constant";
 import { NextResponse, type NextRequest } from "next/server";
 
-const api_url: string | undefined = process.env.ACTIVEITS_API_HOSTNAME;
-const api_port: string | undefined = process.env.ACTIVEITS_API_PORT;
+const api_url = config.ACTIVEITS_API_HOSTNAME;
+const api_port= config.ACTIVEITS_API_PORT;
 
 export default async function get_message(req: NextRequest, res: NextResponse) {
   const dict_response: Record<string, string> = {};
@@ -14,7 +15,6 @@ export default async function get_message(req: NextRequest, res: NextResponse) {
     const active_client: ActiveITSClient = new ActiveITSClient(api_url!, Number(api_port));
     const db_client = ActiveITSDB.getClient();
     const emailService: EmailSender = new EmailSender();
-    const store_history: SaveHistory = new SaveHistory();
     const searchParams = req.nextUrl.searchParams;
     const goldeneye_username: string | null = searchParams.get("goldeneye_username");
     const operator_selection: string | null = searchParams.get("operator_inputs");
@@ -27,7 +27,7 @@ export default async function get_message(req: NextRequest, res: NextResponse) {
     await db_client.connect();
     try {
       const dict_cms_num_to_activeITS_num: Promise<"" | Record<string, string>> | any = db_client.get_cms_id_to_ritms_id_dict();
-      const mas_security_token: string = await active_client.login_to_subsystem(env.DATABUS_SUBSYSTEM, goldeneye_username, db_client);
+      const mas_security_token: string = await active_client.login_to_subsystem(constants.DATABUS_SUBSYSTEM, goldeneye_username, db_client);
       const decoded_cml_queues: string = await active_client.get_queue_msgs(mas_security_token, String(goldeneye_username));
       const tmcal_messages: Record<string, string> = JSON.parse(tm_data!);
       const har_messages: Record<string, string> = JSON.parse(h_data!);
@@ -60,7 +60,7 @@ export default async function get_message(req: NextRequest, res: NextResponse) {
           const email_result = await emailService.sendEmail(epage_message);
           dict_response["EmailResult"] = email_result;
           const push_cms_message_response = JSON.stringify(dict_response, null, 4);
-           store_history.create_entry( // working on history
+           History.create_entry( // working on history
             RECEIVED_DATA,
             operator_selection,
             goldeneye_username!,
@@ -69,7 +69,7 @@ export default async function get_message(req: NextRequest, res: NextResponse) {
             har_messages,
             epage_message
           );
-        store_history.maintain_history_length();
+          History.maintainLength();
         }
       }
     } catch (error) {
