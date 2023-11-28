@@ -1,10 +1,12 @@
 import ActiveITSClient from "@entities/ActiveITSClient";
 import ActiveITSDB from "@entities/ActiveITSDB";
-import * as env from "@utils/config.js";
+import * as constants from "@utils/config.constant";
 import { NextResponse, type NextRequest } from "next/server";
 
-const api_url: string | undefined = process.env.ACTIVEITS_API_HOSTNAME;
-const api_port: string | undefined = process.env.ACTIVEITS_API_PORT;
+import config from "@utils/config";
+
+const api_url = config.ACTIVEITS_API_HOSTNAME;
+const api_port= config.ACTIVEITS_API_PORT;
 
 export default async function get_message(req: NextRequest, res: NextResponse) {
   const dict_response: Record<string, string> = {};
@@ -18,7 +20,7 @@ export default async function get_message(req: NextRequest, res: NextResponse) {
     await db_client.connect();
     try {
       const dict_cms_num_to_activeITS_num: Promise<"" | Record<string, string>> | any = db_client.get_cms_id_to_ritms_id_dict();
-      const mas_security_token: string = await active_client.login_to_subsystem(env.DATABUS_SUBSYSTEM, goldeneye_username, db_client);
+      const mas_security_token: string = await active_client.login_to_subsystem(constants.DATABUS_SUBSYSTEM, goldeneye_username, db_client);
       const decoded_cml_queues: string = await active_client.get_queue_msgs(mas_security_token, String(goldeneye_username));
 
       const cms_num_to_current_msg: Promise<"" | Record<string, string>> | any = await db_client.get_current_cms_msgs();
